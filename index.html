@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Programme Entraînement — Nightwing Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #16191f;
+    --border: #1e2229;
+    --accent-blue: #4fc3f7;
+    --accent-red: #ef5350;
+    --accent-gold: #ffd54f;
+    --accent-green: #66bb6a;
+    --accent-purple: #ce93d8;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,195,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,195,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  header {
+    text-align: center;
+    margin-bottom: 50px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', cursive;
+    font-size: clamp(52px, 10vw, 90px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  h1 span { color: var(--accent-blue); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 1px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); border-color: #2e3440; }
+  .tab-btn.active { color: #0a0c10; border-color: transparent; font-weight: 600; }
+
+  .day-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .day-card.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .day-header {
+    padding: 24px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+  }
+
+  .day-info { flex: 1; }
+
+  .day-name {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 36px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .day-focus {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .day-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .section {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .exercises {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 10px;
+  }
+
+  .exercise {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color 0.2s;
+  }
+
+  .exercise:hover { border-color: #2e3440; }
+
+  .ex-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .ex-sets {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .ex-tip {
+    font-size: 11px;
+    margin-top: 5px;
+    padding: 5px 8px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 4px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .agility-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  .agility-card {
+    background: var(--surface);
+    border: 1px solid rgba(79,195,247,0.2);
+    border-radius: 8px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .agility-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent-blue), transparent);
+  }
+
+  .agility-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-blue);
+    margin-bottom: 4px;
+  }
+
+  .agility-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Couleurs par jour */
+  .lundi .day-name, .lundi .day-focus { color: #ef5350; }
+  .lundi .day-badge { background: rgba(239,83,80,0.15); color: #ef5350; }
+  .lundi .section-title { color: #ef5350; }
+
+  .mardi .day-name, .mardi .day-focus { color: #4fc3f7; }
+  .mardi .day-badge { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+  .mardi .section-title { color: #4fc3f7; }
+
+  .mercredi .day-name, .mercredi .day-focus { color: #66bb6a; }
+  .mercredi .day-badge { background: rgba(102,187,106,0.15); color: #66bb6a; }
+  .mercredi .section-title { color: #66bb6a; }
+
+  .jeudi .day-name, .jeudi .day-focus { color: #ffd54f; }
+  .jeudi .day-badge { background: rgba(255,213,79,0.15); color: #ffd54f; }
+  .jeudi .section-title { color: #ffd54f; }
+
+  .vendredi .day-name, .vendredi .day-focus { color: #ce93d8; }
+  .vendredi .day-badge { background: rgba(206,147,216,0.15); color: #ce93d8; }
+  .vendredi .section-title { color: #ce93d8; }
+
+  .weekend .day-name, .weekend .day-focus { color: var(--accent-blue); }
+  .weekend .day-badge { background: rgba(79,195,247,0.15); color: var(--accent-blue); }
+  .weekend .section-title { color: var(--accent-blue); }
+
+  .note-box {
+    margin-top: 4px;
+    background: rgba(79,195,247,0.05);
+    border: 1px solid rgba(79,195,247,0.15);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .note-box strong { color: var(--accent-blue); }
+
+  .stat-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .stat strong {
+    display: block;
+    font-family: 'Bebas Neue', cursive;
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <div class="label">🦇 Programme Athlète</div>
+    <h1>NIGHT<span>WING</span><br>MODE</h1>
+    <p class="subtitle">Force · Mobilité · Agilité — 5 jours / semaine</p>
+  </header>
+
+  <div class="stat-row">
+    <div class="stat"><strong>5</strong>Jours actifs</div>
+    <div class="stat"><strong>2</strong>Sessions agilité/sem</div>
+    <div class="stat"><strong>60–75 min</strong>Par séance</div>
+    <div class="stat"><strong>53 kg</strong>Profil slim/athlétique</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="show('lundi', this)">Lundi</button>
+    <button class="tab-btn" onclick="show('mardi', this)">Mardi</button>
+    <button class="tab-btn" onclick="show('mercredi', this)">Mercredi</button>
+    <button class="tab-btn" onclick="show('jeudi', this)">Jeudi</button>
+    <button class="tab-btn" onclick="show('vendredi', this)">Vendredi</button>
+    <button class="tab-btn" onclick="show('weekend', this)">Week-end</button>
+  </div>
+
+  <!-- LUNDI -->
+  <div class="day-card lundi active" id="lundi">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Lundi</div>
+        <div class="day-focus">Pectoraux · Biceps</div>
+      </div>
+      <div class="day-badge">Push + Curl</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Échauffement (5 min)</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Rotations d'épaules</span>
+          <span class="ex-sets">2 × 15 reps par sens</span>
+          <span class="ex-tip">Tourne les bras en grand cercle vers l'avant puis vers l'arrière pour chauffer les articulations.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Tirage élastique visage</span>
+          <span class="ex-sets">2 × 20 reps</span>
+          <span class="ex-tip">Tends un élastique devant toi et tire-le vers ton visage en écartant les coudes. Prépare les rotateurs de l'épaule.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Pectoraux</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Développé couché barre</span>
+          <span class="ex-sets">4 × 8–10 reps</span>
+          <span class="ex-tip">Allongé sur le banc, descends la barre lentement jusqu'à la poitrine (2 sec), pause 1 sec, pousse en 2 sec. Omoplates serrées.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Développé incliné haltères</span>
+          <span class="ex-sets">3 × 10–12 reps</span>
+          <span class="ex-tip">Banc à 30–45°. Descends les haltères jusqu'aux côtés de la poitrine haute, pousse vers le haut sans verrouiller les coudes.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Écarté poulie ou haltères</span>
+          <span class="ex-sets">3 × 12–15 reps</span>
+          <span class="ex-tip">Bras légèrement fléchis, descends en arc de cercle jusqu'au niveau des épaules, remonte en serrant les pecs. Serre fort en haut.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Pompes lestées (finisher)</span>
+          <span class="ex-sets">2 × maximum</span>
+          <span class="ex-tip">Pompes classiques avec un sac lesté ou une plaque dans le dos. Va jusqu'à l'échec pour vider les pecs en fin de séance.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Biceps</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Curl barre EZ</span>
+          <span class="ex-sets">3 × 10–12 reps</span>
+          <span class="ex-tip">Tiens la barre en zigzag (EZ), coudes collés au corps. Remonte la barre jusqu'aux épaules en contractant les biceps, redescends lentement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Curl marteau haltères</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Pouce vers le haut (prise neutre). Fléchis les avant-bras alternativement. Travaille le muscle brachial sous le biceps pour plus d'épaisseur.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Curl concentré</span>
+          <span class="ex-sets">2 × 15 reps / bras</span>
+          <span class="ex-tip">Assis, coude calé contre la cuisse intérieure. Monte l'haltère lentement, serre fort en haut, redescends sans lâcher la tension.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARDI -->
+  <div class="day-card mardi" id="mardi">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Mardi</div>
+        <div class="day-focus">Dos · Triceps</div>
+      </div>
+      <div class="day-badge">Pull + Extend</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Dos</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Tractions prise pronation</span>
+          <span class="ex-sets">4 × 6–10 reps</span>
+          <span class="ex-tip">Paumes vers l'avant, largeur épaules. Tire ta poitrine vers la barre en pensant à écraser des oranges sous tes aisselles. Descends complètement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Rowing barre penché</span>
+          <span class="ex-sets">4 × 8–10 reps</span>
+          <span class="ex-tip">Dos droit, penché à 45°, tire la barre vers ton nombril. Coudes près du corps. Serre les omoplates ensemble en haut.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Tirage poulie haute</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Assis, tire la barre vers le haut de la poitrine en ramenant les coudes vers le bas et les côtés. Penche légèrement le buste en arrière.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Rowing à un bras haltère</span>
+          <span class="ex-sets">3 × 12 reps / bras</span>
+          <span class="ex-tip">Un genou et une main sur le banc. Tire l'haltère vers ta hanche (pas vers l'épaule). Rotation naturelle du buste autorisée.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Tirage visage poulie</span>
+          <span class="ex-sets">3 × 15 reps</span>
+          <span class="ex-tip">Poulie haute, tire la corde vers ton visage en écartant les mains. Coudes à hauteur des épaules. Serre les muscles du haut du dos.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Triceps</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Dips aux barres parallèles</span>
+          <span class="ex-sets">3 × 8–10 reps</span>
+          <span class="ex-tip">Reste droit (pas penché en avant pour cibler les triceps). Descends jusqu'à 90° aux coudes, remonte sans verrouiller. Ajoute du lest si facile.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Extension barre au front</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Allongé, barre au-dessus de la tête, coudes vers le plafond. Plie les coudes pour descendre la barre vers le front, puis remonte. Coudes fixes !</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Poussée triceps poulie haute</span>
+          <span class="ex-sets">3 × 15 reps</span>
+          <span class="ex-tip">Coudes collés aux côtés du corps, pousse la corde ou la barre vers le bas jusqu'à extension complète. Remonte lentement.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">⚡ Agilité #1 — après séance (15 min)</div>
+      <div class="agility-grid">
+        <div class="agility-card">
+          <div class="agility-name">Échelle de vitesse au sol</div>
+          <div class="agility-desc">Trace des carreaux au sol. Enchaîne : 2 pieds dans chaque case, carioca latéral, pas croisés. 5 × 30 sec.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Sauts sur box</div>
+          <div class="agility-desc">Saute sur une box ou un banc d'un seul élan, descends en contrôle. 4 × 8 répétitions. Atterris les genoux fléchis.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Bonds latéraux</div>
+          <div class="agility-desc">Saute le plus loin possible sur le côté d'une jambe à l'autre. Atterris en équilibre. 3 × 10 par sens.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Saut en longueur</div>
+          <div class="agility-desc">Pieds joints, fléchis les genoux et propulse-toi le plus loin possible. Atterris souple sur les deux pieds. 4 × 5 reps.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MERCREDI -->
+  <div class="day-card mercredi" id="mercredi">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Mercredi</div>
+        <div class="day-focus">Jambes · Épaules · Abdominaux</div>
+      </div>
+      <div class="day-badge">Lower + Épaules + Core</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Jambes — Quadriceps / Fessiers</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Squat barre</span>
+          <span class="ex-sets">4 × 6–8 reps</span>
+          <span class="ex-tip">Barre sur les trapèzes, pieds largeur épaules. Descends le plus bas possible (cuisses parallèles au sol minimum). Dos droit, genoux dans l'axe des pieds.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Presse à cuisses</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Pieds au milieu de la plateforme, largeur épaules. Descends jusqu'à 90° sans décoller les fesses du siège. Pousse de façon explosive.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Fentes marchées haltères</span>
+          <span class="ex-sets">3 × 10 reps / jambe</span>
+          <span class="ex-tip">Avance en faisant de grands pas, genou arrière près du sol. Garde le buste droit. Alterne les jambes à chaque pas.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Extension des cuisses (machine)</span>
+          <span class="ex-sets">3 × 15 reps</span>
+          <span class="ex-tip">Assis, chevilles sous le coussin. Étends complètement les jambes, serre les quadriceps en haut, redescends lentement en 3 sec.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Jambes — Ischio-jambiers / Mollets</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Soulevé de terre jambes tendues</span>
+          <span class="ex-sets">3 × 10 reps</span>
+          <span class="ex-tip">Haltères ou barre. Penche-toi en avant en gardant le dos droit, descends jusqu'au tibia. Remonte en contractant les fessiers et les ischio-jambiers.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Curl jambes couché (machine)</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Allongé sur le ventre, talons sous le coussin. Ramène les talons vers les fesses. Descends lentement, ne laisse pas tomber le poids.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Mollets debout lestés</span>
+          <span class="ex-sets">4 × 20 reps</span>
+          <span class="ex-tip">Bord d'une marche ou au sol. Monte sur la pointe des pieds le plus haut possible, descends jusqu'à sentir un étirement dans le mollet. Lent et contrôlé.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Épaules</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Développé militaire haltères</span>
+          <span class="ex-sets">4 × 8–10 reps</span>
+          <span class="ex-tip">Assis ou debout, haltères au niveau des épaules paumes vers l'avant. Pousse vers le haut sans cambrer le dos. Redescends lentement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Élévations latérales haltères</span>
+          <span class="ex-sets">4 × 15 reps</span>
+          <span class="ex-tip">Bras légèrement fléchis, lève les haltères sur les côtés jusqu'à hauteur d'épaule. Remonte vite, descends en 3 sec pour plus de travail.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Oiseau haltères penché</span>
+          <span class="ex-sets">3 × 15 reps</span>
+          <span class="ex-tip">Penché à 90°, dos plat. Lève les bras sur les côtés comme si tu ouvrais des ailes. Travaille le dos de l'épaule (faisceau postérieur).</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Abdominaux</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Gainage planche</span>
+          <span class="ex-sets">3 × 45–60 sec</span>
+          <span class="ex-tip">Avant-bras au sol, corps parfaitement droit de la tête aux talons. Ne laisse pas tomber les hanches ni les lever. Respire normalement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Relevé de jambes suspendu</span>
+          <span class="ex-sets">3 × 12–15 reps</span>
+          <span class="ex-tip">Accroché à la barre, lève les jambes tendues (ou genoux fléchis si trop dur) jusqu'à la hauteur des hanches. Contrôle la descente.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Crunch câble</span>
+          <span class="ex-sets">3 × 15 reps</span>
+          <span class="ex-tip">À genoux face à la poulie haute, corde derrière la tête. Contracte les abdos pour amener les coudes vers les genoux. Ne tire pas avec les bras.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Rotation russe lestée</span>
+          <span class="ex-sets">3 × 20 reps (10/côté)</span>
+          <span class="ex-tip">Assis, jambes légèrement levées, tourne le buste de gauche à droite en tenant un haltère ou un disque. Travaille les obliques.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JEUDI -->
+  <div class="day-card jeudi" id="jeudi">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Jeudi</div>
+        <div class="day-focus">Haut du corps complet</div>
+      </div>
+      <div class="day-badge">Full Upper</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Poitrine + Dos (volume)</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Dips aux barres</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Penché légèrement en avant pour cibler les pecs. Descends jusqu'à 90°, remonte sans verrouiller les coudes.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Tractions prise supination</span>
+          <span class="ex-sets">3 × 8–10 reps</span>
+          <span class="ex-tip">Paumes vers toi (prise bicesp). Tire ta poitrine vers la barre. Meilleur exercice pour le dos et les biceps combinés.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Rowing haltère alterné</span>
+          <span class="ex-sets">3 × 12 reps / bras</span>
+          <span class="ex-tip">Debout, légèrement penché. Alterne bras gauche et bras droit. Tire l'haltère vers la hanche, coude vers le plafond.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Écarté câbles croisés</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Poulies en haut des deux côtés. Bras ouverts, croise les mains devant toi en contractant les pecs. Reviens lentement.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Bras (volume secondaire)</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Curl haltères alternés debout</span>
+          <span class="ex-sets">3 × 12 reps / bras</span>
+          <span class="ex-tip">Debout, fléchis un bras à la fois. Tourne le poignet vers le haut pendant la montée (supination). Coudes fixes.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Extension triceps derrière la tête</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Un haltère tenu à deux mains derrière la tête. Étends les bras vers le haut sans bouger les coudes. Descends lentement.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">⚡ Agilité #2 — après séance (15 min)</div>
+      <div class="agility-grid">
+        <div class="agility-card">
+          <div class="agility-name">Parkour de base</div>
+          <div class="agility-desc">Sauts de précision d'un point à l'autre, franchissements d'obstacles (appui des mains), déplacements au sol. 10 min de flow.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Burpees explosifs</div>
+          <div class="agility-desc">Au sol → pompe → saute en croix avec bras levés. Enchaîne sans pause. 4 × 10 répétitions.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Sprint en T (changements de direction)</div>
+          <div class="agility-desc">Place 4 cônes en T. Sprint avant, déplacement latéral, retour. Chronomètre tes séries. 5 passages.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Lancer de médecine-ball au sol</div>
+          <div class="agility-desc">Lève le ballon au-dessus de la tête et claque-le fort au sol. Attrape ou ramasse. Coordination + puissance. 3 × 10.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENDREDI -->
+  <div class="day-card vendredi" id="vendredi">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Vendredi</div>
+        <div class="day-focus">Bas du corps · Épaules · Abdominaux</div>
+      </div>
+      <div class="day-badge">Lower + Épaules + Core</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Force explosive — Jambes</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Soulevé de terre à la trap bar</span>
+          <span class="ex-sets">4 × 5 reps</span>
+          <span class="ex-tip">Entre dans la barre hexagonale, attrape les poignées, dos droit, hanches en arrière. Pousse le sol pour te lever. Charge lourde, peu de reps.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Squat bulgare (pied arrière surélevé)</span>
+          <span class="ex-sets">3 × 10 reps / jambe</span>
+          <span class="ex-tip">Pied arrière posé sur un banc, pied avant loin devant. Descends en flexion profonde. Garde le buste droit. Excellent pour l'équilibre et la force.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Poussée de hanches (hip thrust) barre</span>
+          <span class="ex-sets">4 × 12 reps</span>
+          <span class="ex-tip">Épaules sur le banc, barre sur les hanches. Monte les hanches jusqu'à ce que ton corps forme une ligne droite. Serre fort les fessiers en haut.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Épaules</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Développé Arnold haltères</span>
+          <span class="ex-sets">3 × 10 reps</span>
+          <span class="ex-tip">Commence paumes vers toi à hauteur d'épaule, tourne les poignets en montant. Travaille les 3 faisceaux de l'épaule en un seul mouvement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Élévations frontales haltères</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Bras tendus, lève les haltères devant toi jusqu'à hauteur des yeux. Descends lentement. Travaille le faisceau antérieur de l'épaule.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Tirage menton barre</span>
+          <span class="ex-sets">3 × 12 reps</span>
+          <span class="ex-tip">Tire la barre depuis les cuisses jusqu'au menton, coudes montants sur les côtés. Prise serrée. Travaille épaules et trapèzes.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Abdominaux + Gainage Nightwing</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Drapeau humain progressif</span>
+          <span class="ex-sets">3 × maximum</span>
+          <span class="ex-tip">Allongé sur un banc, tiens-toi sur les côtés. Soulève ton corps en gardant les jambes tendues. Commence en pliant les genoux si besoin. Core acrobatique.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Position en L aux barres parallèles</span>
+          <span class="ex-sets">3 × 20 secondes</span>
+          <span class="ex-tip">Appui sur les barres parallèles, lève les jambes tendues à l'horizontale. Maintiens sans balancer. Renforce le bas du ventre et les fléchisseurs de hanche.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Position corps creux au sol</span>
+          <span class="ex-sets">3 × 30 secondes</span>
+          <span class="ex-tip">Allongé, bras tendus au-dessus de la tête, lève légèrement jambes et épaules. Corps en forme de banane inversée. Respire normalement sans toucher le sol.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Flexion colonne vertébrale lestée</span>
+          <span class="ex-sets">3 × 8 reps</span>
+          <span class="ex-tip">Debout, haltère léger dans les mains. Descends vertèbre par vertèbre vers l'avant, puis remonte de la même façon. Améliore la souplesse du dos.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Étirements actifs (10 min)</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Étirement pigeon au sol</span>
+          <span class="ex-sets">90 sec / côté</span>
+          <span class="ex-tip">Une jambe pliée devant toi à 90°, l'autre tendue derrière. Penche le buste en avant. Ouvre en profondeur la hanche, indispensable pour les mouvements acrobatiques.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Grand écart assis (pancake)</span>
+          <span class="ex-sets">3 × 30 sec</span>
+          <span class="ex-tip">Jambes ouvertes au maximum. Penche le buste vers l'avant. Avance lentement les mains. Augmente progressivement l'amplitude sur les semaines.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Étirement quadriceps au mur</span>
+          <span class="ex-sets">60 sec / jambe</span>
+          <span class="ex-tip">Pied arrière contre le mur, genou à 90°. Rapproche-toi du mur. Étire profondément le quadriceps et le psoas. Reste droit.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEEK-END -->
+  <div class="day-card weekend" id="weekend">
+    <div class="day-header">
+      <div class="day-info">
+        <div class="day-name">Week-end</div>
+        <div class="day-focus">Récupération active</div>
+      </div>
+      <div class="day-badge">Active Rest</div>
+    </div>
+    <div class="section">
+      <div class="section-title">Option A — Agilité libre (30–40 min)</div>
+      <div class="agility-grid">
+        <div class="agility-card">
+          <div class="agility-name">Parkour urbain</div>
+          <div class="agility-desc">Sauts de précision, franchissements d'obstacles, roulades. Style Spider-Man 100%. Commence par des obstacles bas.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Trampoline park</div>
+          <div class="agility-desc">Explosivité, coordination aérienne, proprioception. Option fun et très efficace pour développer le sens du corps dans l'espace.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Escalade</div>
+          <div class="agility-desc">Force de préhension, mobilité 3D, lecture de l'espace. Profil parfait Nightwing. En salle ou en extérieur.</div>
+        </div>
+        <div class="agility-card">
+          <div class="agility-name">Natation</div>
+          <div class="agility-desc">Récupération musculaire complète + cardio sans impact. Idéal après une semaine chargée.</div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Option B — Mobilité (20 min)</div>
+      <div class="exercises">
+        <div class="exercise">
+          <span class="ex-name">Salutation au soleil</span>
+          <span class="ex-sets">5 cycles lents</span>
+          <span class="ex-tip">Enchaîne : debout → mains au sol → planche → cobra → chien tête en bas → retour debout. Mobilise tout le corps progressivement.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Rotation thoracique au sol</span>
+          <span class="ex-sets">2 × 15 reps / côté</span>
+          <span class="ex-tip">À 4 pattes, place une main derrière la tête et tourne le coude vers le plafond. Mobilise le milieu du dos souvent rigide.</span>
+        </div>
+        <div class="exercise">
+          <span class="ex-name">Pont arrière (étirement épaules-poitrine)</span>
+          <span class="ex-sets">2 × 10 reps</span>
+          <span class="ex-tip">Assis au sol, mains derrière toi à plat. Pousse les hanches vers le plafond, ouvre la poitrine. Ouvre le thorax et les épaules.</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">🕷️ Objectif Nightwing / Spider-Man</div>
+      <div class="note-box">
+        <strong>Pourquoi ce programme ?</strong><br><br>
+        Nightwing et Spider-Man ne sont pas des bodybuilders. Leur physique repose sur :<br><br>
+        • <strong>Force relative élevée</strong> — fort par rapport au poids de corps<br>
+        • <strong>Agilité et réactivité</strong> — échelle de vitesse, bonds, parkour<br>
+        • <strong>Mobilité extrême</strong> — hanches, épaules, colonne vertébrale<br>
+        • <strong>Core acrobatique</strong> — drapeau humain, position en L, corps creux<br><br>
+        À 53 kg tu as l'avantage du rapport force/poids. <strong>Mange suffisamment</strong> : vise 95–105 g de protéines par jour minimum, sinon tu ne progresseras pas peu importe l'entraînement.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function show(id, btn) {
+    document.querySelectorAll('.day-card').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active');
+      b.style.background = '';
+      b.style.color = '';
+    });
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    const colors = {
+      lundi: '#ef5350', mardi: '#4fc3f7', mercredi: '#66bb6a',
+      jeudi: '#ffd54f', vendredi: '#ce93d8', weekend: '#4fc3f7'
+    };
+    btn.style.background = colors[id] || '#4fc3f7';
+    btn.style.color = '#0a0c10';
+  }
+
+  document.querySelector('.tab-btn.active').style.background = '#ef5350';
+  document.querySelector('.tab-btn.active').style.color = '#0a0c10';
+</script>
+</body>
+</html>
